@@ -185,7 +185,7 @@ async function callBnKidsStoriesApi(mode) {
       child_prompt: childPrompt
     };
 
-    const res = await fetch("/api/story", {
+    const res = await fetch("https://bn-kids-stories-worker.bjorta-bb.workers.dev/api/story", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
