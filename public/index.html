@@ -31,18 +31,27 @@
 
           <div class="field">
             <label for="childAge">Ålder</label>
-            <input type="number" id="childAge" min="3" max="15" required placeholder="T.ex. 8" />
+            <input type="number" id="childAge" min="3" max="15" required placeholder="T.ex. 11" />
           </div>
         </div>
 
         <div class="field">
           <label for="storyTitle">Bokens titel</label>
-          <input type="text" id="storyTitle" required placeholder="T.ex. Taxen Tage och den magiska stenen" />
+          <input
+            type="text"
+            id="storyTitle"
+            required
+            placeholder="T.ex. Taxen Tage och den hemliga diamantgrottan"
+          />
         </div>
 
         <div class="field">
           <label for="userPrompt">Vad ska kapitlet handla om?</label>
-          <textarea id="userPrompt" rows="4" placeholder="T.ex. Tage hittar en mystisk dörr i skogen..."></textarea>
+          <textarea
+            id="userPrompt"
+            rows="4"
+            placeholder="T.ex. Tage och Maja hittar en hemlig dörr i grottan..."
+          ></textarea>
           <p class="hint">
             För första kapitlet: beskriv boken kort (figur, känsla, miljö).<br />
             För fortsättning: skriv t.ex. &quot;Fortsätt där vi slutade, nu ska Tage gå in genom dörren...&quot;
@@ -83,11 +92,15 @@
       <ul>
         <li>Du fyller i barnets namn, ålder och hittar på en boktitel.</li>
         <li>BN-Kids-Stories sparar kapitlen lokalt i din webbläsare (per enhet).</li>
-        <li>När du klickar &quot;Fortsätt boken&quot; skickas de tidigare kapitlen + din nya idé till sagomotorn.</li>
+        <li>
+          När du klickar &quot;Fortsätt boken&quot; skickas de tidigare kapitlen + din nya idé till
+          sagomotorn.
+        </li>
         <li>Motorn skriver ett nytt kapitel som fortsätter där ni slutade.</li>
       </ul>
       <p class="small">
-        I v1 är detta en demo. En betalvägg (t.ex. 99 kr/mån) och inloggning kan läggas på senare, utan att vi ändrar själva sagomotorn.
+        I v1 är detta en demo. En betalvägg (t.ex. 99 kr/mån) och inloggning kan läggas på senare, utan att
+        vi ändrar själva sagomotorn.
       </p>
     </section>
 
@@ -95,8 +108,8 @@
     <section class="card info-card" id="safety">
       <h3>Trygghet & säkerhet</h3>
       <p>
-        BN-Kids-Stories är byggt för barn och familjer. Sagorna skapas av en AI-motor med tydliga regler för vad som är
-        tillåtet.
+        BN-Kids-Stories är byggt för barn och familjer. Sagorna skapas av en AI-motor med tydliga regler
+        för vad som är tillåtet.
       </p>
       <ul>
         <li>Inget våld på en nivå som passar vuxenfilm – inga blodiga eller groteska scener.</li>
@@ -104,12 +117,15 @@
         <li>Inga svordomar eller kränkande uttryck mot barn eller grupper.</li>
         <li>Ingen användning av upphovsrättsskyddade figurer (t.ex. Pippi, Harry Potter, Marvel-hjältar).</li>
         <li>Explosioner och action kan förekomma – men utan skador, blod eller trauma.</li>
-        <li>AI:n styrs av en barnanpassad systemprompt och extra filter för att hålla tonen trygg.</li>
+        <li>
+          AI:n styrs av en barnanpassad systemprompt och extra filter för att hålla tonen trygg även när det
+          är spännande.
+        </li>
       </ul>
       <p class="small">
-        BN-Kids-Stories sparar kapitelboken lokalt i din webbläsare på den här enheten. I denna v1-version lagrar vi inte barnets
-        berättelser i en extern databas. När vi inför konton och molnlagring kommer vi lägga till tydlig information om
-        hur data lagras och kan tas bort.
+        BN-Kids-Stories sparar kapitelboken lokalt i din webbläsare på den här enheten. I denna v1-version
+        lagrar vi inte barnets berättelser i en extern databas. När vi inför konton och molnlagring kommer vi
+        lägga till tydlig information om hur data lagras och kan tas bort.
       </p>
     </section>
 
@@ -119,40 +135,43 @@
 
       <h4>Är sagorna helt automatiskt genererade?</h4>
       <p>
-        Ja. Du skriver vad boken ska handla om, och BN-Kids-Stories skapar kapitlen automatiskt. Du kan fortsätta samma bok
-        kväll efter kväll genom att trycka &quot;Fortsätt boken&quot;.
+        Ja. Du skriver vad boken ska handla om, och BN-Kids-Stories skapar kapitlen automatiskt. Du kan
+        fortsätta samma bok kväll efter kväll genom att trycka &quot;Fortsätt boken&quot;.
       </p>
 
       <h4>Kan mitt barn skriva in vad som helst?</h4>
       <p>
-        Barnet kan skriva vad som helst, men sagomotorn följer alltid våra trygghetsregler. Om ett barn försöker skriva
-        något olämpligt (t.ex. våldsamt eller upphovsrättsskyddat) tonas det ner eller ersätts av en snällare variant.
+        Barnet kan skriva vad som helst, men sagomotorn följer alltid våra trygghetsregler. Om ett barn
+        försöker skriva något olämpligt (t.ex. våldsamt eller upphovsrättsskyddat) tonas det ner eller
+        ersätts av en snällare variant.
       </p>
 
       <h4>Vad händer om mitt barn skriver in Pippi eller andra kända figurer?</h4>
       <p>
-        BN-Kids-Stories fortsätter inte berättelser med skyddade figurer. Istället föreslår vi egna hjältar och världar med
-        liknande känsla, men med helt eget innehåll. På så sätt följer vi upphovsrätten och barnet får ändå en rolig saga.
+        BN-Kids-Stories fortsätter inte berättelser med skyddade figurer. Istället föreslår vi egna hjältar
+        och världar med liknande känsla, men med helt eget innehåll. På så sätt följer vi upphovsrätten och
+        barnet får ändå en rolig saga.
       </p>
 
       <h4>Sparas mitt barns sagor hos er?</h4>
       <p>
-        I den här v1-demoversionen sparas sagorna bara lokalt i webbläsaren på den enhet du använder. Om du rensar din
-        webbläsare eller byter enhet följer inte sagorna automatiskt med. När vi inför konton och molnlagring kommer vi
-        ha en tydlig policy för hur du kan exportera och radera sagor.
+        I den här v1-demoversionen sparas sagorna bara lokalt i webbläsaren på den enhet du använder. Om du
+        rensar din webbläsare eller byter enhet följer inte sagorna automatiskt med. När vi inför konton och
+        molnlagring kommer vi ha en tydlig policy för hur du kan exportera och radera sagor.
       </p>
 
       <h4>Kan mitt barn lyssna på sagan istället för att läsa?</h4>
       <p>
-        Ja. Klicka på knappen &quot;▶️ Lyssna på senaste kapitlet&quot; så läser webbläsaren upp texten med en syntetisk
-        röst. I framtida versioner kan vi lägga till ännu mer naturliga röster via externa TTS-tjänster.
+        Ja. Klicka på knappen &quot;▶️ Lyssna på senaste kapitlet&quot; så läser webbläsaren upp texten med
+        en syntetisk röst. I framtida versioner kan vi lägga till ännu mer naturliga röster via externa
+        TTS-tjänster.
       </p>
 
       <h4>Är det här ett färdigt abonnemang eller en testversion?</h4>
       <p>
-        Den här versionen av BN-Kids-Stories är en teknisk demo. Det betyder att grundfunktionen – att skapa kapitelböcker –
-        redan fungerar. När vi är nöjda med stabilitet, trygghet och kvalitet kan vi lägga på betalning (t.ex. 99 kr/mån)
-        och konton.
+        Den här versionen av BN-Kids-Stories är en teknisk demo. Det betyder att grundfunktionen – att skapa
+        kapitelböcker – redan fungerar. När vi är nöjda med stabilitet, trygghet och kvalitet kan vi lägga på
+        betalning (t.ex. 99 kr/mån) och konton.
       </p>
     </section>
   </main>
