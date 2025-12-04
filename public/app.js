@@ -271,6 +271,8 @@ if (resetStoryBtn) {
 });
 
 // Init
+// Init
 renderStory();
 
+// Worker URL (bn-kids-stories v1)
 window.BN_WORKER_URL = "https://bn-kids-stories-worker.bjorta-bb.worker.dev";
