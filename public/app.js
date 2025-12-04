@@ -272,3 +272,5 @@ if (resetStoryBtn) {
 
 // Init
 renderStory();
+
+windows.BN_WORKER_URL = "https://bn-kids-stories-worker.bjorta-bb.worker.dev";
