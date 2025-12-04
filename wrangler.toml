@@ -1,13 +1,6 @@
-name = "bn-kids-stories"
-main = "worker/bn_kids_stories_worker.js"
+name = "bn-kids-stories-worker"
+main = "worker/bnkidsstories_worker.js"
 compatibility_date = "2025-01-01"
 
-[vars]
-# Du sätter OPENAI_API_KEY i Cloudflare Dashboard (Workers → Settings → Variables).
-# Här kan du ha defaults lokalt om du vill.
-# OPENAI_API_KEY = "sk-..."
-
-# När du är redo kan du lägga till routes, t.ex:
-# routes = [
-#   { pattern = "bn-kids-stories.pages.dev/api/story", zone_id = "<din_zone_id>" }
-# ]
+# OPENAI_API_KEY sätter du i Cloudflare Dashboard under
+# Workers → bn-kids-stories-worker → Settings → Variables.
