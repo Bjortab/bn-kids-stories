@@ -271,7 +271,6 @@ if (resetStoryBtn) {
 });
 
 // Init
-// Init
 renderStory();
 
 // Worker URL (bn-kids-stories v1)
