@@ -268,7 +268,7 @@ if (resetStoryBtn) {
       resetStoryOnThisDevice();
     }
   });
-});
+};
 
 // Init
 renderStory();
