@@ -1,107 +1,288 @@
-/* === BN-Kids-Stories v1 – Golden Copy style.css === */
+/* === BN-Kids-Stories – Golden Copy UI v1 === */
 
-/* Bas */
+/* Bakgrund med blå toning */
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #081a2b;
-  color: #eee;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #f9fafb;
+  background: radial-gradient(circle at top, #0ea5e9 0, #020617 55%, #000 100%);
+  min-height: 100vh;
 }
 
+.page-background {
+  min-height: 100vh;
+}
+
+/* Header */
+.site-header {
+  padding: 1.6rem 1rem 0.5rem;
+  text-align: center;
+}
+
+.site-header-inner h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.9rem;
+}
+
+.site-header-inner p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* Container */
 .container {
   width: 95%;
   max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 0;
+  margin: 0 auto 3rem;
 }
 
-/* Kort */
+/* Cards */
 .card {
-  background: #fff;
-  color: #000;
-  border-radius: 14px;
-  padding: 1.6rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  background: rgba(15, 23, 42, 0.96);
+  border-radius: 16px;
+  padding: 1.4rem 1.3rem 1.6rem;
+  margin-bottom: 1.4rem;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(12px);
 }
 
-/* Rubriker */
 .card h2 {
   margin-top: 0;
+  margin-bottom: 0.6rem;
+  font-size: 1.3rem;
 }
 
-/* Form och inputs */
+.card-info h2 {
+  margin-bottom: 0.8rem;
+}
+
+/* Form */
 .field {
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
-input, textarea {
+.field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+input,
+textarea {
   width: 100%;
-  padding: 0.8rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 0.7rem 0.8rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  background: rgba(15, 23, 42, 0.8);
+  color: #e5e7eb;
   box-sizing: border-box;
 }
 
+input::placeholder,
+textarea::placeholder {
+  color: rgba(148, 163, 184, 0.8);
+}
+
 textarea {
-  min-height: 100px;
+  min-height: 110px;
   resize: vertical;
 }
 
-/* === KNAPPAR === */
+/* Form-grid på större skärmar */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    flex-direction: row;
+  }
+}
+
+/* Knappar */
+.button-row,
+.tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
+}
+
 button {
   border: none;
-  padding: 0.7rem 1.4rem;
-  border-radius: 10px;
-  font-weight: bold;
+  padding: 0.65rem 1.3rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-  background: #0ea5e9;
-  color: #fff;
+  background: linear-gradient(135deg, #0ea5e9, #22c55e);
+  color: #0b1120;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.6);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
 }
 
 button.secondary {
-  background: #4b5563;
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: #e5e7eb;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.8);
 }
 
 button.danger {
-  background: #ef4444;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #111827;
+  box-shadow: 0 8px 24px rgba(185, 28, 28, 0.75);
 }
 
-/* === STORY OUTPUT FIX (din bugg) === */
-#storyOutput {
-  white-space: pre-wrap;         /* radbrytning */
-  word-wrap: break-word;         /* bryt långa ord */
-  line-height: 1.55;             /* bättre läsbarhet */
-  font-size: 1.03rem;            /* lite större text */
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(15, 118, 110, 0.7);
+  opacity: 0.97;
+}
 
-  max-width: 100%;
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.9);
+}
+
+/* Story-output */
+.story-output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
   overflow-wrap: anywhere;
-
-  background: #fafafa;
-  padding: 1.2rem;
+  line-height: 1.6;
+  font-size: 0.98rem;
+  background: rgba(15, 23, 42, 0.9);
   border-radius: 12px;
-
-  /* det viktiga för dig */
-  max-height: none;              /* låt rutan bli hög precis som du vill */
+  padding: 1rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  max-height: none;
 }
 
-/* TOAST */
+.helper-text {
+  font-size: 0.85rem;
+  color: rgba(209, 213, 219, 0.85);
+  margin-top: 0;
+}
+
+/* Accordion (FAQ & Safety) */
+.accordion {
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  margin-bottom: 0.8rem;
+}
+
+.accordion summary {
+  list-style: none;
+  padding: 0.7rem 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.accordion summary::after {
+  content: "▾";
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-left: 0.6rem;
+}
+
+.accordion[open] summary::after {
+  content: "▴";
+}
+
+.accordion-body {
+  padding: 0.8rem 0.9rem 0.9rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
+  font-size: 0.9rem;
+  color: rgba(229, 231, 235, 0.94);
+}
+
+.accordion-body h3 {
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+}
+
+.accordion-body p {
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.accordion-body ul {
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.1rem;
+}
+
+/* Spinner */
+.spinner {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: #f9fafb;
+  font-size: 1.05rem;
+}
+
+.spinner.hidden {
+  display: none !important;
+}
+
+.loader {
+  width: 46px;
+  height: 46px;
+  border: 4px solid #0ea5e9;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 0.85rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast */
 #toast {
   position: fixed;
-  bottom: 1rem;
+  bottom: 1.1rem;
   left: 50%;
   transform: translateX(-50%);
   background: #0ea5e9;
-  color: white;
-  padding: 0.8rem 1.4rem;
-  border-radius: 10px;
+  color: #0b1120;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
   opacity: 0;
-  transition: 0.35s ease;
+  transition: opacity 0.25s ease;
+  box-shadow: 0 10px 24px rgba(8, 47, 73, 0.8);
+  z-index: 10000;
 }
 
 #toast.visible {
