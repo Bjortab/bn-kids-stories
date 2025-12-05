@@ -1,23 +1,22 @@
-//---------------------------------------------------------
-// BN-Kids-Stories v3.1 – frontend (Golden Copy)
-// - Story-flöde
-// - Spinner-overlay
-// - Accordion
-// - Stats för dashboard (sparas i localStorage)
-//---------------------------------------------------------
+// BN-Kids-Stories v2 – frontend
+// - Kopplar mot Cloudflare-worker (BN-Kids StoryEngine)
+// - Sparar bok lokalt per enhet
+// - Visar kapitel i dropdowns (ett <details> per kapitel)
 
+// Standard-URL till API-workern (kan överskridas via <script> före denna fil)
 window.BN_WORKER_URL =
   window.BN_WORKER_URL ||
   "https://bn-kids-stories-worker.bjorta-bb.workers.dev";
 
+// (valfri) TTS-worker – vi kan justera denna senare om du vill
 window.TTS_WORKER_URL =
   window.TTS_WORKER_URL ||
   "https://get-audio-worker.bjorta-bb.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const STORAGE_KEY = "bnkidsstories_state_v1";
-  const STATS_KEY = "bnkidsstories_stats_v1";
+  const STORAGE_KEY = "bnkidsstories_state_v2";
 
+  // --- DOM-element ---
   const childNameInput = document.getElementById("childName");
   const childAgeInput = document.getElementById("childAge");
   const bookTitleInput = document.getElementById("bookTitle");
@@ -30,78 +29,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const storyOutput = document.getElementById("storyOutput");
   const toastEl = document.getElementById("toast");
-  const overlay = document.getElementById("loadingOverlay");
 
-  // storyState = själva boken på den här enheten
+  // för enkel "spinner": vi byter text & disable på knappar
+  const originalBtnTexts = {
+    new: newBookBtn ? newBookBtn.textContent : "",
+    cont: continueBookBtn ? continueBookBtn.textContent : ""
+  };
+
+  // --- State i minnet ---
   let storyState = {
     childName: "",
     childAge: null,
     bookTitle: "",
     chapterIndex: 0,
     previousChapters: [],
-    summary: "",
+    summary: ""
   };
 
-  // stats = bara för dashboarden
-  let stats = {
-    totalChapters: 0,
-    miniChapters: 0,
-    fullChapters: 0,
-  };
-
-  // -------- TOAST --------
+  // --- Hjälpfunktion: toast ---
   function showToast(message) {
-    if (!toastEl) {
+    if (toastEl) {
+      toastEl.textContent = message;
+      toastEl.classList.add("visible");
+      setTimeout(() => {
+        toastEl.classList.remove("visible");
+      }, 4000);
+    } else {
+      console.log("[BN-Kids-Stories]", message);
       alert(message);
-      return;
     }
-    toastEl.textContent = message;
-    toastEl.classList.add("visible");
-    setTimeout(() => toastEl.classList.remove("visible"), 3500);
   }
 
-  // -------- OVERLAY --------
-  function showOverlay() {
-    if (overlay) overlay.classList.remove("hidden");
-  }
-  function hideOverlay() {
-    if (overlay) overlay.classList.add("hidden");
+  // --- Enkel "laddar"-indikator ---
+  function setLoading(isLoading) {
+    if (isLoading) {
+      if (newBookBtn) {
+        newBookBtn.disabled = true;
+        newBookBtn.textContent = "Skapar kapitel...";
+      }
+      if (continueBookBtn) {
+        continueBookBtn.disabled = true;
+        continueBookBtn.textContent = "Skapar kapitel...";
+      }
+    } else {
+      if (newBookBtn) {
+        newBookBtn.disabled = false;
+        newBookBtn.textContent = originalBtnTexts.new;
+      }
+      if (continueBookBtn) {
+        continueBookBtn.disabled = false;
+        continueBookBtn.textContent = originalBtnTexts.cont;
+      }
+    }
   }
 
-  // -------- LOCAL STORAGE (story) --------
+  // --- LocalStorage ---
   function loadStoryState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
+
       const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        storyState = {
+          childName: parsed.childName || "",
+          childAge: parsed.childAge || null,
+          bookTitle: parsed.bookTitle || "",
+          chapterIndex:
+            typeof parsed.chapterIndex === "number" ? parsed.chapterIndex : 0,
+          previousChapters: Array.isArray(parsed.previousChapters)
+            ? parsed.previousChapters
+            : [],
+          summary: parsed.summary || ""
+        };
 
-      storyState = {
-        childName: parsed.childName || "",
-        childAge: parsed.childAge || null,
-        bookTitle: parsed.bookTitle || "",
-        chapterIndex:
-          typeof parsed.chapterIndex === "number" ? parsed.chapterIndex : 0,
-        previousChapters: Array.isArray(parsed.previousChapters)
-          ? parsed.previousChapters
-          : [],
-        summary: parsed.summary || "",
-      };
-
-      if (childNameInput) childNameInput.value = storyState.childName;
-      if (childAgeInput)
-        childAgeInput.value =
-          storyState.childAge !== null ? String(storyState.childAge) : "";
-      if (bookTitleInput) bookTitleInput.value = storyState.bookTitle;
+        // Fyll i formuläret med sparad info
+        if (childNameInput) childNameInput.value = storyState.childName;
+        if (childAgeInput)
+          childAgeInput.value = storyState.childAge
+            ? String(storyState.childAge)
+            : "";
+        if (bookTitleInput) bookTitleInput.value = storyState.bookTitle;
+      }
     } catch (err) {
-      console.error("Kunde inte läsa storyState:", err);
+      console.error("Kunde inte läsa storyState från localStorage:", err);
     }
   }
 
   function saveStoryState() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storyState));
+      const toSave = {
+        childName: storyState.childName,
+        childAge: storyState.childAge,
+        bookTitle: storyState.bookTitle,
+        chapterIndex: storyState.chapterIndex,
+        previousChapters: storyState.previousChapters,
+        summary: storyState.summary
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch (err) {
-      console.error("Kunde inte spara storyState:", err);
+      console.error("Kunde inte spara storyState till localStorage:", err);
     }
   }
 
@@ -112,13 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
       bookTitle: "",
       chapterIndex: 0,
       previousChapters: [],
-      summary: "",
+      summary: ""
     };
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (err) {
-      console.error("Kunde inte ta bort storyState:", err);
-    }
+    localStorage.removeItem(STORAGE_KEY);
 
     if (childNameInput) childNameInput.value = "";
     if (childAgeInput) childAgeInput.value = "";
@@ -126,205 +149,211 @@ document.addEventListener("DOMContentLoaded", () => {
     if (promptInput) promptInput.value = "";
 
     renderStory();
-    showToast("Boken rensad på denna enhet.");
+    showToast("Den här enhetens bok är rensad.");
   }
 
-  // -------- LOCAL STORAGE (stats) --------
-  function loadStats() {
-    try {
-      const raw = localStorage.getItem(STATS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      stats = {
-        totalChapters: parsed.totalChapters || 0,
-        miniChapters: parsed.miniChapters || 0,
-        fullChapters: parsed.fullChapters || 0,
-      };
-    } catch (err) {
-      console.error("Kunde inte läsa stats:", err);
-    }
-  }
-
-  function saveStats() {
-    try {
-      localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-    } catch (err) {
-      console.error("Kunde inte spara stats:", err);
-    }
-  }
-
-  // -------- RENDER STORY --------
+  // --- Rendera berättelsen i UI (DROPDOWN PER KAPITEL) ---
   function renderStory() {
     if (!storyOutput) return;
 
+    // Inget innehåll?
     if (
-      !storyState.previousChapters ||
+      !storyState ||
       !Array.isArray(storyState.previousChapters) ||
       storyState.previousChapters.length === 0
     ) {
-      storyOutput.textContent = "Här kommer din berättelse att visas. ✨";
+      storyOutput.innerHTML = "";
+      const p = document.createElement("p");
+      p.textContent = "Här kommer din berättelse att visas. ✨";
+      storyOutput.appendChild(p);
       return;
     }
 
-    const parts = storyState.previousChapters.map((t, i) => {
-      return `Kapitel ${i + 1}\n\n${t}`;
-    });
+    // Rensa och bygg upp <details> för varje kapitel
+    storyOutput.innerHTML = "";
 
-    storyOutput.textContent = parts.join("\n\n──────────\n\n");
+    storyState.previousChapters.forEach((chapterText, index) => {
+      const chapterNo = index + 1;
+
+      const detailsEl = document.createElement("details");
+      detailsEl.className = "chapter-block";
+
+      // Sista (senaste) kapitlet ska vara öppet som standard
+      if (index === storyState.previousChapters.length - 1) {
+        detailsEl.open = true;
+      }
+
+      const summaryEl = document.createElement("summary");
+      summaryEl.textContent = `Kapitel ${chapterNo}`;
+      detailsEl.appendChild(summaryEl);
+
+      const textWrapper = document.createElement("div");
+      textWrapper.className = "chapter-text";
+      // Behåll radbrytningar
+      textWrapper.textContent = chapterText;
+
+      detailsEl.appendChild(textWrapper);
+      storyOutput.appendChild(detailsEl);
+    });
   }
 
-  // -------- API CALL --------
-  async function callApi(mode) {
-    const workerUrl = window.BN_WORKER_URL;
-
-    const childName = (childNameInput?.value || "").trim();
-    const ageStr = (childAgeInput?.value || "").trim();
-    const childAge = ageStr ? parseInt(ageStr, 10) : null;
-    const bookTitle = (bookTitleInput?.value || "").trim();
-    const childPrompt = (promptInput?.value || "").trim();
-
-    if (!childName || !bookTitle || !childPrompt) {
-      showToast("Fyll i namn, ålder, titel och vad kapitlet ska handla om.");
-      return;
-    }
-
-    storyState.childName = childName;
-    storyState.childAge = Number.isNaN(childAge) ? null : childAge;
-    storyState.bookTitle = bookTitle;
-
-    const payload = {
-      mode,
-      child_name: childName,
-      child_age: storyState.childAge,
-      book_title: bookTitle,
-      chapter_index: storyState.chapterIndex,
-      previous_chapters: storyState.previousChapters,
-      summary_so_far: storyState.summary,
-      child_prompt: childPrompt,
-    };
-
+  // --- Anrop till BN-Kids-Stories worker ---
+  async function callBnKidsStoriesApi(mode) {
     try {
-      showOverlay();
-      if (newBookBtn) newBookBtn.disabled = true;
-      if (continueBookBtn) continueBookBtn.disabled = true;
+      const workerUrl =
+        window.BN_WORKER_URL ||
+        "https://bn-kids-stories-worker.bjorta-bb.workers.dev";
 
+      const childName = (childNameInput?.value || "").trim();
+      const childAge = parseInt((childAgeInput?.value || "").trim(), 10) || null;
+      const bookTitle = (bookTitleInput?.value || "").trim();
+      const childPrompt = (promptInput?.value || "").trim();
+
+      if (!childName || !bookTitle || !childPrompt) {
+        showToast("Fyll i namn, ålder, titel och vad kapitlet ska handla om.");
+        return;
+      }
+
+      // uppdatera state med senaste formulärvärden
+      storyState.childName = childName;
+      storyState.childAge = childAge;
+      storyState.bookTitle = bookTitle;
+
+      const payload = {
+        mode, // "new" eller "continue"
+        child_name: childName,
+        child_age: childAge,
+        book_title: bookTitle,
+        chapter_index:
+          typeof storyState.chapterIndex === "number"
+            ? storyState.chapterIndex
+            : 0,
+        previous_chapters: storyState.previousChapters || [],
+        summary_so_far: storyState.summary || "",
+        child_prompt: childPrompt
+      };
+
+      setLoading(true);
+
+      // Viktigt: text/plain för att slippa CORS-preflight (OPTIONS)
       const response = await fetch(`${workerUrl}/api/story`, {
         method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
-        console.error("API-svar inte OK:", response.status);
-        showToast("API-fel. Försök igen.");
+        console.error(
+          "BN-Kids-Stories API svarade inte OK:",
+          response.status,
+          await response.text().catch(() => "")
+        );
+        showToast(
+          "Fel vid anrop till BN-Kids-Stories API. Försök igen om en liten stund."
+        );
         return;
       }
 
       const data = await response.json().catch((err) => {
-        console.error("Kunde inte parsa API-svar:", err);
+        console.error("Kunde inte parsa JSON från API:", err);
         return null;
       });
 
       if (!data || !data.ok) {
-        console.error("API-data fel:", data);
-        showToast(data?.error || "Okänt API-fel.");
+        console.error("BN-Kids-Stories API fel:", data);
+        showToast(
+          "API-fel: " + (data?.error || "Okänt fel. Prova igen om en stund.")
+        );
         return;
       }
 
-      const newText = (data.chapter_text || "").trim();
-      if (!newText) {
-        showToast("Inget kapitel i svar.");
+      const newChapterText = (data.chapter_text || "").trim();
+      const nextChapterIndex =
+        typeof data.chapter_index === "number"
+          ? data.chapter_index
+          : storyState.chapterIndex + 1;
+
+      if (!newChapterText) {
+        showToast("API svarade utan kapiteltext. Försök igen.");
         return;
       }
 
       if (!Array.isArray(storyState.previousChapters)) {
         storyState.previousChapters = [];
       }
-      storyState.previousChapters.push(newText);
-      storyState.chapterIndex =
-        typeof data.chapter_index === "number"
-          ? data.chapter_index
-          : storyState.chapterIndex + 1;
+      storyState.previousChapters.push(newChapterText);
+      storyState.chapterIndex = nextChapterIndex;
       storyState.summary = data.summary_so_far || storyState.summary || "";
 
-      // ---- uppdatera stats för dashboarden ----
-      const modelUsed = data.model_used || "";
-      stats.totalChapters += 1;
-      if (modelUsed.includes("mini")) {
-        stats.miniChapters += 1;
-      } else if (modelUsed.includes("gpt-4.1")) {
-        stats.fullChapters += 1;
-      }
-
       saveStoryState();
-      saveStats();
       renderStory();
 
-      showToast("Kapitel skapat! ✨");
+      showToast("Nytt kapitel skapat ✨");
     } catch (err) {
-      console.error("Tekniskt fel vid API-anrop:", err);
-      showToast("Tekniskt fel. Kontrollera internet och försök igen.");
+      console.error("Tekniskt fel vid anrop till BN-Kids-Stories API:", err);
+      showToast(
+        "Tekniskt fel vid anrop till BN-Kids-Stories API. Kontrollera internet och försök igen."
+      );
     } finally {
-      hideOverlay();
-      if (newBookBtn) newBookBtn.disabled = false;
-      if (continueBookBtn) continueBookBtn.disabled = false;
+      setLoading(false);
     }
   }
 
-  // -------- TTS --------
-  async function playTts() {
-    if (
-      !storyState.previousChapters ||
-      !Array.isArray(storyState.previousChapters) ||
-      storyState.previousChapters.length === 0
-    ) {
-      showToast("Inget kapitel finns.");
-      return;
-    }
-
-    const workerUrl = window.TTS_WORKER_URL;
-    const lastChapter =
-      storyState.previousChapters[storyState.previousChapters.length - 1];
-
-    const payload = {
-      text: lastChapter,
-      voice: "sv-SE",
-    };
-
+  // --- TTS – läs upp senaste kapitlet ---
+  async function playLatestChapterTts() {
     try {
+      if (
+        !storyState ||
+        !Array.isArray(storyState.previousChapters) ||
+        storyState.previousChapters.length === 0
+      ) {
+        showToast("Det finns inget kapitel att läsa upp ännu.");
+        return;
+      }
+
+      const workerUrl =
+        window.TTS_WORKER_URL ||
+        "https://get-audio-worker.bjorta-bb.workers.dev";
+
+      const lastChapter =
+        storyState.previousChapters[storyState.previousChapters.length - 1];
+
+      const payload = {
+        text: lastChapter,
+        voice: "sv-SE" // kan justeras senare
+      };
+
       const response = await fetch(workerUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
-        console.error("TTS-svar inte OK:", response.status);
+        console.error("TTS-worker svarade inte OK:", response.status);
         showToast("Kunde inte generera ljud just nu.");
         return;
       }
 
       const blob = await response.blob();
-      const audio = new Audio(URL.createObjectURL(blob));
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
       audio.play().catch((err) => {
         console.error("Kunde inte spela upp ljud:", err);
         showToast("Kunde inte spela upp ljudet.");
       });
     } catch (err) {
-      console.error("TTS-fel:", err);
-      showToast("Tekniskt fel vid ljudgenerering.");
+      console.error("Tekniskt fel i TTS-funktion:", err);
+      showToast("Tekniskt fel när ljudet skulle spelas upp.");
     }
   }
 
-  // -------- ACCORDION --------
-  document.querySelectorAll(".accordion-header").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const parent = btn.parentElement;
-      parent.classList.toggle("open");
-    });
-  });
+  // --- Event listeners ---
 
-  // -------- BUTTONS --------
   if (newBookBtn) {
     newBookBtn.addEventListener("click", () => {
       // Ny bok → nollställ tidigare kapitel men behåll namn/ålder/titel
@@ -333,34 +362,35 @@ document.addEventListener("DOMContentLoaded", () => {
       storyState.summary = "";
       saveStoryState();
       renderStory();
-      callApi("new");
+      callBnKidsStoriesApi("new");
     });
   }
 
   if (continueBookBtn) {
     continueBookBtn.addEventListener("click", () => {
       if (
-        !storyState.previousChapters ||
+        !storyState ||
         !Array.isArray(storyState.previousChapters) ||
         storyState.previousChapters.length === 0
       ) {
         showToast("Det finns ingen bok att fortsätta, starta en ny först.");
         return;
       }
-      callApi("continue");
+
+      callBnKidsStoriesApi("continue");
     });
   }
 
   if (ttsPlayBtn) {
     ttsPlayBtn.addEventListener("click", () => {
-      playTts();
+      playLatestChapterTts();
     });
   }
 
   if (resetStoryBtn) {
     resetStoryBtn.addEventListener("click", () => {
       if (
-        !storyState.previousChapters ||
+        !storyState ||
         !Array.isArray(storyState.previousChapters) ||
         storyState.previousChapters.length === 0
       ) {
@@ -377,8 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // INIT
+  // --- Init ---
   loadStoryState();
-  loadStats();
   renderStory();
 });
