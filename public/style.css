@@ -1,278 +1,194 @@
-/* ====== Reset & bas ====== */
+/* === BN-Kids-Stories – Golden Copy UI v1 === */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
+/* Bakgrund med blå toning */
 body {
   margin: 0;
-  padding: 0;
-  height: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  color: #f9fafb;
+  background: radial-gradient(circle at top, #0ea5e9 0, #020617 55%, #000 100%);
+  min-height: 100vh;
 }
 
-/* Bakgrund – blå/turkos toning lik den du gillade i början */
-body {
-  background: radial-gradient(circle at top, #05c3ff 0, #0088b4 45%, #004361 100%);
-  color: #0d1b24;
+.page-background {
+  min-height: 100vh;
 }
 
-/* ====== Hero ====== */
-
-.hero {
-  padding: 1.5rem 1rem 0.5rem;
+/* Header */
+.site-header {
+  padding: 1.6rem 1rem 0.5rem;
+  text-align: center;
 }
 
-.hero-inner {
-  max-width: 960px;
-  margin: 0 auto;
+.site-header-inner h1 {
+  margin: 0 0 0.3rem;
+  font-size: 1.9rem;
 }
 
-.hero h1 {
+.site-header-inner p {
   margin: 0;
-  font-size: 2.2rem;
-  color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-.hero p {
-  margin: 0.25rem 0;
-  color: #e9f7ff;
-}
-
-.hero-sub {
-  opacity: 0.95;
   font-size: 0.95rem;
+  opacity: 0.9;
 }
 
-/* ====== Main container & cards ====== */
-
-.main-container {
-  max-width: 960px;
-  margin: 0 auto 2rem;
-  padding: 0 1rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Container */
+.container {
+  width: 95%;
+  max-width: 900px;
+  margin: 0 auto 3rem;
 }
 
+/* Cards */
 .card {
-  background: rgba(255, 255, 255, 0.97);
+  background: rgba(15, 23, 42, 0.96);
   border-radius: 16px;
-  padding: 1.5rem 1.25rem;
-  box-shadow: 0 18px 40px rgba(0, 40, 70, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  padding: 1.4rem 1.3rem 1.6rem;
+  margin-bottom: 1.4rem;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(12px);
 }
 
 .card h2 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
+  font-size: 1.3rem;
 }
 
-/* ====== Form ====== */
-
-#story-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.card-info h2 {
+  margin-bottom: 0.8rem;
 }
 
-.field-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
+/* Form */
 .field {
-  flex: 1 1 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  margin-bottom: 0.85rem;
 }
 
-.field-small {
-  max-width: 120px;
-}
-
-label {
-  font-size: 0.85rem;
-  opacity: 0.9;
+.field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 input,
 textarea {
-  background: #f4fbff;
-  color: #0d1b24;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 72, 110, 0.25);
-  padding: 0.55rem 0.6rem;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
   font-size: 0.95rem;
-  outline: none;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  background: rgba(15, 23, 42, 0.8);
+  color: #e5e7eb;
+  box-sizing: border-box;
 }
 
-input:focus,
-textarea:focus {
-  border-color: #00a8ff;
-  box-shadow: 0 0 0 1px rgba(0, 168, 255, 0.5);
+input::placeholder,
+textarea::placeholder {
+  color: rgba(148, 163, 184, 0.8);
 }
 
 textarea {
+  min-height: 110px;
   resize: vertical;
-  min-height: 80px;
 }
 
-/* ====== Buttons ====== */
+/* Form-grid på större skärmar */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
 
-.button-row {
+@media (min-width: 640px) {
+  .form-grid {
+    flex-direction: row;
+  }
+}
+
+/* Knappar */
+.button-row,
+.tools-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
+  gap: 0.7rem;
+  margin-top: 0.9rem;
 }
 
 button {
-  border-radius: 999px;
   border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 0.65rem 1.3rem;
+  border-radius: 999px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-}
-
-button.primary {
-  background: #00c46a;
-  color: #022013;
+  background: linear-gradient(135deg, #0ea5e9, #22c55e);
+  color: #0b1120;
+  box-shadow: 0 8px 24px rgba(15, 118, 110, 0.6);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.08s ease;
 }
 
 button.secondary {
-  background: #0067ff;
-  color: #ffffff;
+  background: linear-gradient(135deg, #64748b, #475569);
+  color: #e5e7eb;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.8);
 }
 
 button.danger {
-  background: #ff4b4b;
-  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #111827;
+  box-shadow: 0 8px 24px rgba(185, 28, 28, 0.75);
 }
 
-button:disabled {
-  opacity: 0.65;
-  cursor: default;
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(15, 118, 110, 0.7);
+  opacity: 0.97;
 }
 
-/* ====== Loading indicator (spinner-text) ====== */
-
-.loading-indicator {
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: opacity 0.2s ease, max-height 0.2s ease;
-  color: #06354c;
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.9);
 }
 
-.loading-indicator.visible {
-  opacity: 1;
-  max-height: 2.5rem;
-}
-
-/* ====== Story output (kapitelbok med dropdowns) ====== */
-
+/* Story-output */
 .story-output {
-  margin-top: 0.25rem;
-  background: #07141f;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  font-size: 0.98rem;
+  background: rgba(15, 23, 42, 0.9);
   border-radius: 12px;
-  padding: 0.9rem 0.9rem 0.6rem;
-  color: #f7f9ff;
-  font-size: 0.9rem;
-  max-height: 60vh;
-  overflow-y: auto;
+  padding: 1rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  max-height: none;
 }
 
-.story-placeholder {
-  opacity: 0.85;
+.helper-text {
+  font-size: 0.85rem;
+  color: rgba(209, 213, 219, 0.85);
+  margin-top: 0;
 }
 
-/* Varje kapitel som ett <details> block */
-.chapter-block {
-  border-radius: 10px;
-  margin-bottom: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(7, 26, 42, 0.96);
-}
-
-.chapter-block summary {
-  list-style: none;
-  cursor: pointer;
-  padding: 0.45rem 0.65rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.chapter-block summary::-webkit-details-marker {
-  display: none;
-}
-
-.chapter-block summary::after {
-  content: "▾";
-  font-size: 0.75rem;
-  opacity: 0.9;
-}
-
-.chapter-block[open] summary::after {
-  content: "▴";
-}
-
-.chapter-body {
-  padding: 0.4rem 0.65rem 0.6rem;
-  line-height: 1.4;
-  white-space: normal;
-}
-
-.chapter-body p {
-  margin: 0 0 0.6rem;
-}
-
-/* Gör senaste kapitlet lite tydligare */
-.chapter-block.latest summary {
-  background: linear-gradient(90deg, #00b8ff 0, #00e28e 100%);
-  color: #04121b;
-}
-
-/* ====== Story actions under kapitelbok ====== */
-
-.story-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-/* ====== Accordion-kort (How it works / Safety / FAQ) ====== */
-
-.accordion details {
-  border-radius: 10px;
-  background: #f5fbff;
-  border: 1px solid rgba(0, 69, 104, 0.18);
+/* Accordion (FAQ & Safety) */
+.accordion {
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  margin-bottom: 0.8rem;
 }
 
 .accordion summary {
   list-style: none;
-  padding: 0.6rem 0.8rem;
+  padding: 0.7rem 0.85rem;
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -284,57 +200,91 @@ button:disabled {
 
 .accordion summary::after {
   content: "▾";
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-left: 0.6rem;
 }
 
-.accordion details[open] summary::after {
+.accordion[open] summary::after {
   content: "▴";
 }
 
 .accordion-body {
-  padding: 0.4rem 0.8rem 0.7rem;
+  padding: 0.8rem 0.9rem 0.9rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.4);
   font-size: 0.9rem;
+  color: rgba(229, 231, 235, 0.94);
 }
 
-/* ====== Toast ====== */
+.accordion-body h3 {
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+  font-size: 0.95rem;
+}
 
-.toast {
+.accordion-body p {
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.accordion-body ul {
+  margin-top: 0.2rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.1rem;
+}
+
+/* Spinner */
+.spinner {
   position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  color: #f9fafb;
+  font-size: 1.05rem;
+}
+
+.spinner.hidden {
+  display: none !important;
+}
+
+.loader {
+  width: 46px;
+  height: 46px;
+  border: 4px solid #0ea5e9;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 0.85rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 1.1rem;
   left: 50%;
-  bottom: 1.2rem;
   transform: translateX(-50%);
-  background: rgba(0, 23, 37, 0.95);
-  color: #ffffff;
-  padding: 0.65rem 1rem;
+  background: #0ea5e9;
+  color: #0b1120;
+  padding: 0.65rem 1.4rem;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 999;
+  transition: opacity 0.25s ease;
+  box-shadow: 0 10px 24px rgba(8, 47, 73, 0.8);
+  z-index: 10000;
 }
 
-.toast.visible {
+#toast.visible {
   opacity: 1;
-  transform: translateX(-50%) translateY(-4px);
-}
-
-/* ====== Responsivt ====== */
-
-@media (max-width: 640px) {
-  .hero-inner {
-    text-align: left;
-  }
-
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .card {
-    padding: 1.2rem 1rem;
-  }
-
-  .story-output {
-    max-height: 55vh;
-  }
 }
