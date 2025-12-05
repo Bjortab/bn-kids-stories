@@ -1,20 +1,15 @@
-// BN-Kids-Stories v2 – frontend
-// - Kopplar mot Cloudflare-worker (BN-Kids StoryEngine)
-// - Sparar bok lokalt per enhet
-// - Visar kapitel i dropdowns (ett <details> per kapitel)
+// BN-Kids-Stories v1 – frontend
 
-// Standard-URL till API-workern (kan överskridas via <script> före denna fil)
 window.BN_WORKER_URL =
   window.BN_WORKER_URL ||
   "https://bn-kids-stories-worker.bjorta-bb.workers.dev";
 
-// (valfri) TTS-worker – vi kan justera denna senare om du vill
 window.TTS_WORKER_URL =
   window.TTS_WORKER_URL ||
   "https://get-audio-worker.bjorta-bb.workers.dev";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const STORAGE_KEY = "bnkidsstories_state_v2";
+  const STORAGE_KEY = "bnkidsstories_state_v1";
 
   // --- DOM-element ---
   const childNameInput = document.getElementById("childName");
@@ -29,88 +24,90 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const storyOutput = document.getElementById("storyOutput");
   const toastEl = document.getElementById("toast");
+  const spinnerEl = document.getElementById("spinner");
 
-  // för enkel "spinner": vi byter text & disable på knappar
-  const originalBtnTexts = {
-    new: newBookBtn ? newBookBtn.textContent : "",
-    cont: continueBookBtn ? continueBookBtn.textContent : ""
-  };
-
-  // --- State i minnet ---
+  // --- State ---
   let storyState = {
     childName: "",
     childAge: null,
     bookTitle: "",
     chapterIndex: 0,
     previousChapters: [],
-    summary: ""
+    summary: "",
+    modelsUsed: [],
   };
 
-  // --- Hjälpfunktion: toast ---
+  // ===== Helpers =====
+
   function showToast(message) {
-    if (toastEl) {
-      toastEl.textContent = message;
-      toastEl.classList.add("visible");
-      setTimeout(() => {
-        toastEl.classList.remove("visible");
-      }, 4000);
-    } else {
-      console.log("[BN-Kids-Stories]", message);
-      alert(message);
+    if (!toastEl) {
+      console.log("[BN-Kids-Stories toast]", message);
+      return;
     }
+    toastEl.textContent = message;
+    toastEl.classList.add("visible");
+    setTimeout(() => {
+      toastEl.classList.remove("visible");
+    }, 3500);
   }
 
-  // --- Enkel "laddar"-indikator ---
   function setLoading(isLoading) {
-    if (isLoading) {
-      if (newBookBtn) {
-        newBookBtn.disabled = true;
-        newBookBtn.textContent = "Skapar kapitel...";
-      }
-      if (continueBookBtn) {
-        continueBookBtn.disabled = true;
-        continueBookBtn.textContent = "Skapar kapitel...";
-      }
-    } else {
-      if (newBookBtn) {
-        newBookBtn.disabled = false;
-        newBookBtn.textContent = originalBtnTexts.new;
-      }
-      if (continueBookBtn) {
-        continueBookBtn.disabled = false;
-        continueBookBtn.textContent = originalBtnTexts.cont;
-      }
+    if (spinnerEl) {
+      spinnerEl.classList.toggle("spinner-hidden", !isLoading);
     }
+    if (newBookBtn) newBookBtn.disabled = isLoading;
+    if (continueBookBtn) continueBookBtn.disabled = isLoading;
   }
 
-  // --- LocalStorage ---
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/[&<>"']/g, (ch) => {
+      switch (ch) {
+        case "&":
+          return "&amp;";
+        case "<":
+          return "&lt;";
+        case ">":
+          return "&gt;";
+        case '"':
+          return "&quot;";
+        default:
+          return ch;
+      }
+    });
+  }
+
+  // ===== LocalStorage =====
+
   function loadStoryState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
 
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === "object") {
-        storyState = {
-          childName: parsed.childName || "",
-          childAge: parsed.childAge || null,
-          bookTitle: parsed.bookTitle || "",
-          chapterIndex:
-            typeof parsed.chapterIndex === "number" ? parsed.chapterIndex : 0,
-          previousChapters: Array.isArray(parsed.previousChapters)
-            ? parsed.previousChapters
-            : [],
-          summary: parsed.summary || ""
-        };
+      if (!parsed || typeof parsed !== "object") return;
 
-        // Fyll i formuläret med sparad info
-        if (childNameInput) childNameInput.value = storyState.childName;
-        if (childAgeInput)
-          childAgeInput.value = storyState.childAge
-            ? String(storyState.childAge)
-            : "";
-        if (bookTitleInput) bookTitleInput.value = storyState.bookTitle;
-      }
+      storyState = {
+        childName: parsed.childName || "",
+        childAge: parsed.childAge || null,
+        bookTitle: parsed.bookTitle || "",
+        chapterIndex:
+          typeof parsed.chapterIndex === "number" ? parsed.chapterIndex : 0,
+        previousChapters: Array.isArray(parsed.previousChapters)
+          ? parsed.previousChapters
+          : [],
+        summary: parsed.summary || "",
+        modelsUsed: Array.isArray(parsed.modelsUsed)
+          ? parsed.modelsUsed
+          : [],
+      };
+
+      if (childNameInput) childNameInput.value = storyState.childName;
+      if (childAgeInput)
+        childAgeInput.value = storyState.childAge
+          ? String(storyState.childAge)
+          : "";
+      if (bookTitleInput) bookTitleInput.value = storyState.bookTitle;
     } catch (err) {
       console.error("Kunde inte läsa storyState från localStorage:", err);
     }
@@ -124,7 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
         bookTitle: storyState.bookTitle,
         chapterIndex: storyState.chapterIndex,
         previousChapters: storyState.previousChapters,
-        summary: storyState.summary
+        summary: storyState.summary,
+        modelsUsed: storyState.modelsUsed,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
     } catch (err) {
@@ -139,7 +137,8 @@ document.addEventListener("DOMContentLoaded", () => {
       bookTitle: "",
       chapterIndex: 0,
       previousChapters: [],
-      summary: ""
+      summary: "",
+      modelsUsed: [],
     };
     localStorage.removeItem(STORAGE_KEY);
 
@@ -152,52 +151,51 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Den här enhetens bok är rensad.");
   }
 
-  // --- Rendera berättelsen i UI (DROPDOWN PER KAPITEL) ---
+  // ===== Render =====
+
   function renderStory() {
     if (!storyOutput) return;
 
-    // Inget innehåll?
-    if (
-      !storyState ||
-      !Array.isArray(storyState.previousChapters) ||
-      storyState.previousChapters.length === 0
-    ) {
-      storyOutput.innerHTML = "";
-      const p = document.createElement("p");
-      p.textContent = "Här kommer din berättelse att visas. ✨";
-      storyOutput.appendChild(p);
+    const chapters = storyState.previousChapters;
+    if (!chapters || !Array.isArray(chapters) || chapters.length === 0) {
+      storyOutput.textContent = "Här kommer din berättelse att visas. ✨";
       return;
     }
 
-    // Rensa och bygg upp <details> för varje kapitel
-    storyOutput.innerHTML = "";
+    const models = storyState.modelsUsed || [];
 
-    storyState.previousChapters.forEach((chapterText, index) => {
+    const htmlParts = [];
+    htmlParts.push('<div class="chapter-list">');
+
+    chapters.forEach((chapterText, index) => {
       const chapterNo = index + 1;
+      const model = models[index] || "";
+      const openAttr = index === chapters.length - 1 ? " open" : "";
+      const safeText = escapeHtml(chapterText);
 
-      const detailsEl = document.createElement("details");
-      detailsEl.className = "chapter-block";
-
-      // Sista (senaste) kapitlet ska vara öppet som standard
-      if (index === storyState.previousChapters.length - 1) {
-        detailsEl.open = true;
-      }
-
-      const summaryEl = document.createElement("summary");
-      summaryEl.textContent = `Kapitel ${chapterNo}`;
-      detailsEl.appendChild(summaryEl);
-
-      const textWrapper = document.createElement("div");
-      textWrapper.className = "chapter-text";
-      // Behåll radbrytningar
-      textWrapper.textContent = chapterText;
-
-      detailsEl.appendChild(textWrapper);
-      storyOutput.appendChild(detailsEl);
+      htmlParts.push(
+        `<details class="chapter-card"${openAttr}>
+          <summary>
+            <div class="chapter-title-row">
+              <span class="chapter-label">Kapitel ${chapterNo}</span>
+              ${
+                model
+                  ? `<span class="chapter-model">${escapeHtml(model)}</span>`
+                  : ""
+              }
+            </div>
+          </summary>
+          <div class="chapter-body">${safeText}</div>
+        </details>`
+      );
     });
+
+    htmlParts.push("</div>");
+    storyOutput.innerHTML = htmlParts.join("");
   }
 
-  // --- Anrop till BN-Kids-Stories worker ---
+  // ===== API-anrop =====
+
   async function callBnKidsStoriesApi(mode) {
     try {
       const workerUrl =
@@ -214,13 +212,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // uppdatera state med senaste formulärvärden
       storyState.childName = childName;
       storyState.childAge = childAge;
       storyState.bookTitle = bookTitle;
 
       const payload = {
-        mode, // "new" eller "continue"
+        mode,
         child_name: childName,
         child_age: childAge,
         book_title: bookTitle,
@@ -230,18 +227,17 @@ document.addEventListener("DOMContentLoaded", () => {
             : 0,
         previous_chapters: storyState.previousChapters || [],
         summary_so_far: storyState.summary || "",
-        child_prompt: childPrompt
+        child_prompt: childPrompt,
       };
 
       setLoading(true);
 
-      // Viktigt: text/plain för att slippa CORS-preflight (OPTIONS)
       const response = await fetch(`${workerUrl}/api/story`, {
         method: "POST",
         headers: {
-          "Content-Type": "text/plain"
+          "Content-Type": "text/plain",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -283,13 +279,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!Array.isArray(storyState.previousChapters)) {
         storyState.previousChapters = [];
       }
+      if (!Array.isArray(storyState.modelsUsed)) {
+        storyState.modelsUsed = [];
+      }
+
       storyState.previousChapters.push(newChapterText);
       storyState.chapterIndex = nextChapterIndex;
       storyState.summary = data.summary_so_far || storyState.summary || "";
+      storyState.modelsUsed.push(data.model_used || "");
 
       saveStoryState();
       renderStory();
 
+      console.log("[BN-Kids-Stories] Modell:", data.model_used);
       showToast("Nytt kapitel skapat ✨");
     } catch (err) {
       console.error("Tekniskt fel vid anrop till BN-Kids-Stories API:", err);
@@ -301,7 +303,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- TTS – läs upp senaste kapitlet ---
+  // ===== TTS =====
+
   async function playLatestChapterTts() {
     try {
       if (
@@ -322,15 +325,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const payload = {
         text: lastChapter,
-        voice: "sv-SE" // kan justeras senare
+        voice: "sv-SE",
       };
 
       const response = await fetch(workerUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -352,14 +355,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // --- Event listeners ---
+  // ===== Event listeners =====
 
   if (newBookBtn) {
     newBookBtn.addEventListener("click", () => {
-      // Ny bok → nollställ tidigare kapitel men behåll namn/ålder/titel
       storyState.previousChapters = [];
       storyState.chapterIndex = 0;
       storyState.summary = "";
+      storyState.modelsUsed = [];
       saveStoryState();
       renderStory();
       callBnKidsStoriesApi("new");
@@ -407,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Init ---
+  // ===== Init =====
   loadStoryState();
   renderStory();
 });
