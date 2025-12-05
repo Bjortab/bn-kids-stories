@@ -1,247 +1,162 @@
-//---------------------------------------------------------
-// BN-Kids-Stories v2.0 – frontend (Golden Copy)
-//---------------------------------------------------------
-
-window.BN_WORKER_URL =
-  window.BN_WORKER_URL ||
-  "https://bn-kids-stories-worker.bjorta-bb.workers.dev";
-
-window.TTS_WORKER_URL =
-  window.TTS_WORKER_URL ||
-  "https://get-audio-worker.bjorta-bb.workers.dev";
-
-document.addEventListener("DOMContentLoaded", () => {
-  const STORAGE_KEY = "bnkidsstories_state_v1";
-
-  const childNameInput = document.getElementById("childName");
-  const childAgeInput = document.getElementById("childAge");
-  const bookTitleInput = document.getElementById("bookTitle");
-  const promptInput = document.getElementById("chapterPrompt");
-
-  const newBookBtn = document.getElementById("newBookBtn");
-  const continueBookBtn = document.getElementById("continueBookBtn");
-  const ttsPlayBtn = document.getElementById("ttsPlayBtn");
-  const resetStoryBtn = document.getElementById("resetStoryBtn");
-
-  const storyOutput = document.getElementById("storyOutput");
-  const toastEl = document.getElementById("toast");
-  const overlay = document.getElementById("loadingOverlay");
-
-  let storyState = {
-    childName: "",
-    childAge: null,
-    bookTitle: "",
-    chapterIndex: 0,
-    previousChapters: [],
-    summary: "",
-  };
-
-  // -------- TOAST --------
-  function showToast(message) {
-    toastEl.textContent = message;
-    toastEl.classList.add("visible");
-    setTimeout(() => toastEl.classList.remove("visible"), 3500);
-  }
-
-  // -------- OVERLAY --------
-  function showOverlay() {
-    overlay.classList.remove("hidden");
-  }
-  function hideOverlay() {
-    overlay.classList.add("hidden");
-  }
-
-  // -------- LOCAL STORAGE --------
-  function loadStoryState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-
-      storyState = {
-        childName: parsed.childName || "",
-        childAge: parsed.childAge || null,
-        bookTitle: parsed.bookTitle || "",
-        chapterIndex: parsed.chapterIndex ?? 0,
-        previousChapters: parsed.previousChapters || [],
-        summary: parsed.summary || "",
-      };
-
-      childNameInput.value = storyState.childName;
-      childAgeInput.value = storyState.childAge ?? "";
-      bookTitleInput.value = storyState.bookTitle;
-    } catch {}
-  }
-
-  function saveStoryState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(storyState));
-  }
-
-  function resetStoryOnThisDevice() {
-    storyState = {
-      childName: "",
-      childAge: null,
-      bookTitle: "",
-      chapterIndex: 0,
-      previousChapters: [],
-      summary: "",
-    };
-    localStorage.removeItem(STORAGE_KEY);
-
-    childNameInput.value = "";
-    childAgeInput.value = "";
-    bookTitleInput.value = "";
-    promptInput.value = "";
-
-    renderStory();
-    showToast("Boken rensad på denna enhet.");
-  }
-
-  // -------- RENDER --------
-  function renderStory() {
-    if (!storyState.previousChapters.length) {
-      storyOutput.textContent = "Här kommer din berättelse att visas. ✨";
-      return;
-    }
-
-    const parts = storyState.previousChapters.map((t, i) =>
-      `Kapitel ${i + 1}\n\n${t}`
-    );
-
-    storyOutput.textContent = parts.join("\n\n──────────\n\n");
-  }
-
-  // -------- API CALL --------
-  async function callApi(mode) {
-    const workerUrl = window.BN_WORKER_URL;
-
-    const childName = childNameInput.value.trim();
-    const childAge = parseInt(childAgeInput.value.trim(), 10);
-    const bookTitle = bookTitleInput.value.trim();
-    const childPrompt = promptInput.value.trim();
-
-    if (!childName || !bookTitle || !childPrompt) {
-      showToast("Fyll i allt först.");
-      return;
-    }
-
-    storyState.childName = childName;
-    storyState.childAge = childAge;
-    storyState.bookTitle = bookTitle;
-
-    const payload = {
-      mode,
-      child_name: childName,
-      child_age: childAge,
-      book_title: bookTitle,
-      chapter_index: storyState.chapterIndex,
-      previous_chapters: storyState.previousChapters,
-      summary_so_far: storyState.summary,
-      child_prompt: childPrompt,
-    };
-
-    try {
-      showOverlay();
-      newBookBtn.disabled = true;
-      continueBookBtn.disabled = true;
-
-      const response = await fetch(`${workerUrl}/api/story`, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        showToast("API-fel. Försök igen.");
-        return;
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <title>BN-Kids-Stories Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Återanvänd samma CSS som huvud-appen -->
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .dashboard-wrap {
+        width: 95%;
+        max-width: 900px;
+        margin: 2rem auto 3rem;
       }
-
-      const data = await response.json();
-      if (!data.ok) {
-        showToast(data.error || "Okänt API-fel.");
-        return;
+      .dash-title {
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 2px 8px #00000066;
       }
-
-      const newText = data.chapter_text?.trim();
-      if (!newText) {
-        showToast("Inget kapitel i svar.");
-        return;
+      .pill {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: #111827aa;
+        color: #e5e7eb;
+        font-size: 0.75rem;
+        margin-left: 0.4rem;
       }
+      .dash-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.8rem;
+        margin: 1rem 0;
+      }
+      .dash-card {
+        background: #ffffffd8;
+        padding: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px #00000026;
+      }
+      .dash-label {
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-bottom: 0.2rem;
+      }
+      .dash-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #111827;
+      }
+      .small-muted {
+        font-size: 0.8rem;
+        color: #4b5563;
+      }
+      .chart-bar {
+        height: 12px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #e5e7eb;
+        margin-top: 0.3rem;
+      }
+      .chart-mini {
+        height: 100%;
+        background: #22c55e;
+      }
+      .chart-full {
+        height: 100%;
+        background: #3b82f6;
+      }
+      .inline-field {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      .inline-field input {
+        max-width: 120px;
+      }
+    </style>
+  </head>
 
-      storyState.previousChapters.push(newText);
-      storyState.chapterIndex = data.chapter_index ?? (storyState.chapterIndex + 1);
-      storyState.summary = data.summary_so_far ?? storyState.summary;
+  <body>
+    <div class="dashboard-wrap">
+      <h1 class="dash-title">
+        BN-Kids-Stories Dashboard
+        <span class="pill">lokal vy</span>
+      </h1>
 
-      saveStoryState();
-      renderStory();
+      <section class="dash-card">
+        <p class="small-muted">
+          Dashboarden visar bara data för den här enheten och den här
+          webbläsaren. Allt räknas lokalt utifrån hur många kapitel som
+          skapats och vilka modeller som använts (mini vs 4.1).
+        </p>
+      </section>
 
-      showToast("Kapitel skapat! ✨");
+      <section class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-label">Kapitel totalt</div>
+          <div id="dashTotalChapters" class="dash-value">0</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-label">Kapitel (mini)</div>
+          <div id="dashMiniChapters" class="dash-value">0</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-label">Kapitel (4.1)</div>
+          <div id="dashFullChapters" class="dash-value">0</div>
+        </div>
+      </section>
 
-    } catch (err) {
-      console.error(err);
-      showToast("Tekniskt fel.");
-    } finally {
-      hideOverlay();
-      newBookBtn.disabled = false;
-      continueBookBtn.disabled = false;
-    }
-  }
+      <section class="dash-card">
+        <h3>Kostnadsuppskattning</h3>
+        <p class="small-muted">
+          Detta är en schablon. Vi antar ca 1&nbsp;600 tokens per kapitel
+          (input + output). Priser per 1&nbsp;000 tokens (USD): mini ≈
+          0.0005, 4.1 ≈ 0.0025. Justera växelkursen för en grov bild.
+        </p>
 
-  // -------- TTS --------
-  async function playTts() {
-    if (!storyState.previousChapters.length) {
-      showToast("Inget kapitel finns.");
-      return;
-    }
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-label">Totalt (USD)</div>
+            <div id="dashCostUsd" class="dash-value">0.0000</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-label">Totalt (SEK)</div>
+            <div id="dashCostSek" class="dash-value">0.00</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-label">Kostnad / kapitel (SEK)</div>
+            <div id="dashCostPerChapterSek" class="dash-value">0.00</div>
+          </div>
+        </div>
 
-    const workerUrl = window.TTS_WORKER_URL;
+        <div class="inline-field">
+          <label for="dashUsdSekRate">Växelkurs USD→SEK</label>
+          <input id="dashUsdSekRate" type="number" step="0.1" value="11" />
+        </div>
+      </section>
 
-    const payload = {
-      text: storyState.previousChapters.at(-1),
-      voice: "sv-SE",
-    };
+      <section class="dash-card">
+        <h3>Fördelning mini vs 4.1</h3>
+        <p class="small-muted">
+          Visar ungefär hur stor del av kapitlen som gått via mini (billig) och
+          4.1 (dyrare).
+        </p>
+        <div class="chart-bar">
+          <div id="dashMiniBar" class="chart-mini" style="width: 0%"></div>
+        </div>
+        <div class="chart-bar" style="margin-top: 0.4rem">
+          <div id="dashFullBar" class="chart-full" style="width: 0%"></div>
+        </div>
+        <p class="small-muted" style="margin-top: 0.5rem">
+          Grön = mini, blå = 4.1.
+        </p>
+      </section>
+    </div>
 
-    const response = await fetch(workerUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const blob = await response.blob();
-    const audio = new Audio(URL.createObjectURL(blob));
-    audio.play();
-  }
-
-  // -------- ACCORDION --------
-  document.querySelectorAll(".accordion-header").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const parent = btn.parentElement;
-      parent.classList.toggle("open");
-    });
-  });
-
-  // -------- BUTTONS --------
-  newBookBtn.addEventListener("click", () => {
-    storyState.previousChapters = [];
-    storyState.chapterIndex = 0;
-    storyState.summary = "";
-    saveStoryState();
-    renderStory();
-    callApi("new");
-  });
-
-  continueBookBtn.addEventListener("click", () => {
-    if (!storyState.previousChapters.length) {
-      showToast("Starta en ny bok först.");
-      return;
-    }
-    callApi("continue");
-  });
-
-  ttsPlayBtn.addEventListener("click", playTts);
-  resetStoryBtn.addEventListener("click", resetStoryOnThisDevice);
-
-  // INIT
-  loadStoryState();
-  renderStory();
-});
+    <script src="dashboard.js"></script>
+  </body>
+</html>
