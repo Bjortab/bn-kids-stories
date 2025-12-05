@@ -1,105 +1,135 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BN-Kids-Stories</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+  <head>
+    <meta charset="utf-8" />
+    <title>BN-Kids-Stories</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <h1>BN-Kids-Stories</h1>
+        <p>Magiska kapitelböcker, skrivna på ditt barns villkor.</p>
+        <p class="hero-sub">
+          Skriv vad boken ska handla om – BN-Kids-Stories skapar nästa kapitel, ett i taget.
+        </p>
+      </div>
+    </header>
 
-<body>
-  <!-- Overlay spinner -->
-  <div id="loadingOverlay" class="overlay hidden">
-    <div class="spinner"></div>
-    <p>Skapar kapitel...</p>
-  </div>
+    <main class="page-container">
+      <!-- FORM / APP-DELEN -->
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Skapa eller fortsätt din bok</h2>
 
-  <header class="hero"></header>
+        <form id="story-form">
+          <div class="field">
+            <label for="childName">Barnets namn</label>
+            <input id="childName" type="text" autocomplete="off" />
+          </div>
 
-  <main class="container">
+          <div class="field">
+            <label for="childAge">Ålder</label>
+            <input id="childAge" type="number" min="3" max="15" />
+          </div>
 
-    <!-- FORM -->
-    <section class="card">
-      <h2>Skapa eller fortsätt din bok</h2>
-      <form id="story-form">
+          <div class="field">
+            <label for="bookTitle">Bokens titel</label>
+            <input
+              id="bookTitle"
+              type="text"
+              autocomplete="off"
+              placeholder="Cyborg attack, Hästen Bella lär sig hoppa…"
+            />
+          </div>
 
-        <div class="field">
-          <label for="childName">Barnets namn</label>
-          <input id="childName" type="text" />
+          <div class="field">
+            <label for="chapterPrompt">Vad ska kapitlet handla om?</label>
+            <textarea
+              id="chapterPrompt"
+              rows="3"
+              placeholder="Beskriv kort: figur, känsla, miljö, vad som händer…"
+            ></textarea>
+          </div>
+
+          <div class="button-row">
+            <button type="button" id="newBookBtn" class="primary">
+              Starta ny bok (Kapitel 1)
+            </button>
+            <button type="button" id="continueBookBtn" class="secondary">
+              Fortsätt boken (Kapitel 2, 3, …)
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- KAPITELBOKEN -->
+      <section class="card" aria-labelledby="story-title">
+        <div class="card-header">
+          <h2 id="story-title">Din kapitelbok</h2>
+          <div
+            id="spinner"
+            class="spinner spinner-hidden"
+            aria-live="polite"
+          >
+            Skapar kapitel …
+          </div>
         </div>
 
-        <div class="field">
-          <label for="childAge">Ålder</label>
-          <input id="childAge" type="number" />
+        <div id="storyOutput" class="story-output">
+          Här kommer din berättelse att visas. ✨
         </div>
 
-        <div class="field">
-          <label for="bookTitle">Bokens titel</label>
-          <input id="bookTitle" type="text" />
-        </div>
-
-        <div class="field">
-          <label for="chapterPrompt">Vad ska kapitlet handla om?</label>
-          <textarea id="chapterPrompt"></textarea>
-        </div>
-
-        <div class="button-row">
-          <button type="button" id="newBookBtn" class="primary">
-            Starta ny bok (Kapitel 1)
+        <div class="story-actions">
+          <button type="button" id="ttsPlayBtn" class="secondary">
+            Lyssna på senaste kapitlet
           </button>
-
-          <button type="button" id="continueBookBtn" class="secondary">
-            Fortsätt boken (Kapitel 2, 3, …)
+          <button type="button" id="resetStoryBtn" class="danger">
+            Rensa denna bok på den här enheten
           </button>
         </div>
-      </form>
-    </section>
+      </section>
 
-    <!-- STORY OUTPUT -->
-    <section class="card">
-      <h2>Din kapitelbok</h2>
-      <pre id="storyOutput" class="story-box">
-Här kommer din berättelse att visas. ✨
-      </pre>
+      <!-- INFO / SAFETY / FAQ SOM DROPDOWN -->
+      <section class="info-section">
+        <details class="info-card" open>
+          <summary>Hur BN-Kids-Stories v1 funkar</summary>
+          <p>
+            Du fyller i barnets namn, ålder och hittar på en boktitel.
+            BN-Kids-Stories sparar kapitel lokalt i din webbläsare (per enhet).
+          </p>
+          <p>
+            När du fortsätter boken skickar BN-Kids-Stories dina tidigare kapitel
+            till StoryEngine som skapar ett nytt kapitel som passar vidare i berättelsen.
+          </p>
+        </details>
 
-      <div class="button-row">
-        <button id="ttsPlayBtn" class="secondary">Lyssna på senaste kapitlet</button>
-        <button id="resetStoryBtn" class="danger">Rensa denna bok på den här enheten</button>
-      </div>
-    </section>
+        <details class="info-card">
+          <summary>Safety Policy</summary>
+          <p>
+            BN-Kids-Stories kontrollerar automatiskt barnvänlighet (8–15 år),
+            säker ton, inga svordomar, inga blodiga detaljer och inga kända
+            karaktärer eller upphovsrättsskyddade figurer.
+          </p>
+        </details>
 
-    <!-- ACCORDIONS -->
-    <section>
-      <div class="accordion">
-        <button class="accordion-header">Hur BN-Kids-Stories v1 funkar ▸</button>
-        <div class="accordion-content">
-          <p>Du fyller i barnets namn, ålder och hittar på en boktitel.
-          BN-Kids-Stories sparar kapitel lokalt i din webbläsare (enhet).
-          När du fortsätter skickar BN-Kids-Stories dina tidigare kapitel till StoryEngine som skapar nästa kapitel.</p>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">Safety Policy ▸</button>
-        <div class="accordion-content">
-          <p>Systemet kontrollerar barnvänlighet (8–15 år), säker ton och undviker svordomar eller skyddade karaktärer.</p>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">FAQ ▸</button>
-        <div class="accordion-content">
-          <p><strong>Var sparas boken?</strong> Lokalt på den här enheten.</p>
-          <p><strong>Kan jag radera boken?</strong> Ja, tryck på “Rensa denna bok på den här enheten”.</p>
-        </div>
-      </div>
-    </section>
+        <details class="info-card">
+          <summary>FAQ</summary>
+          <p>
+            <strong>Var sparas boken?</strong><br />
+            På den här enheten, i din webbläsare. Den synkas inte med andra enheter.
+          </p>
+          <p>
+            <strong>Kan jag radera boken?</strong><br />
+            Ja, tryck på ”Rensa denna bok på den här enheten”.
+          </p>
+        </details>
+      </section>
+    </main>
 
     <!-- TOAST -->
-    <div id="toast" class="toast">Meddelande</div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  </main>
-
-  <script src="app.js"></script>
-</body>
+    <script src="app.js" defer></script>
+  </body>
 </html>
