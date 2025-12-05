@@ -1,4 +1,4 @@
-/* ====== Reset & bas ====== */
+/* ===== Bas ===== */
 
 *,
 *::before,
@@ -10,137 +10,113 @@ html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+  background: radial-gradient(circle at top, #18a4ff 0, #0072a2 40%, #00324d 100%);
+  color: #111827;
 }
 
-/* Bakgrund – blå/turkos toning lik den du gillade i början */
-body {
-  background: radial-gradient(circle at top, #05c3ff 0, #0088b4 45%, #004361 100%);
-  color: #0d1b24;
-}
-
-/* ====== Hero ====== */
+/* ===== Hero ===== */
 
 .hero {
   padding: 1.5rem 1rem 0.5rem;
+  text-align: center;
+  color: #f9fafb;
 }
 
-.hero-inner {
-  max-width: 960px;
-  margin: 0 auto;
+.hero-inner h1 {
+  margin: 0 0 0.3rem;
+  font-size: clamp(2.1rem, 3vw, 2.6rem);
 }
 
-.hero h1 {
+.hero-inner p {
   margin: 0;
-  font-size: 2.2rem;
-  color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-}
-
-.hero p {
-  margin: 0.25rem 0;
-  color: #e9f7ff;
-}
-
-.hero-sub {
-  opacity: 0.95;
   font-size: 0.95rem;
 }
 
-/* ====== Main container & cards ====== */
+.hero-sub {
+  opacity: 0.9;
+  margin-top: 0.15rem;
+}
 
-.main-container {
-  max-width: 960px;
-  margin: 0 auto 2rem;
+/* ===== Page layout ===== */
+
+.page-container {
+  max-width: 880px;
+  margin: 0 auto 3rem;
   padding: 0 1rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
+/* ===== Cards ===== */
+
 .card {
-  background: rgba(255, 255, 255, 0.97);
-  border-radius: 16px;
-  padding: 1.5rem 1.25rem;
-  box-shadow: 0 18px 40px rgba(0, 40, 70, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: #f9fafb;
+  border-radius: 14px;
+  padding: 1.4rem 1.6rem 1.5rem;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.45);
 }
 
 .card h2 {
   margin-top: 0;
-  margin-bottom: 1rem;
 }
 
-/* ====== Form ====== */
-
-#story-form {
+.card-header {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.field-row {
-  display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
 }
 
+/* ===== Form ===== */
+
 .field {
-  flex: 1 1 200px;
+  margin-bottom: 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
-.field-small {
-  max-width: 120px;
+.field label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
 }
 
-label {
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
-input,
-textarea {
-  background: #f4fbff;
-  color: #0d1b24;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 72, 110, 0.25);
-  padding: 0.55rem 0.6rem;
+.field input,
+.field textarea {
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0.55rem 0.7rem;
   font-size: 0.95rem;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-input:focus,
-textarea:focus {
-  border-color: #00a8ff;
-  box-shadow: 0 0 0 1px rgba(0, 168, 255, 0.5);
+.field input:focus,
+.field textarea:focus {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.25);
 }
 
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-/* ====== Buttons ====== */
+/* ===== Buttons ===== */
 
 .button-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 0.25rem;
+  margin-top: 0.6rem;
 }
 
 button {
   border-radius: 999px;
+  padding: 0.55rem 1.4rem;
   border: none;
-  padding: 0.6rem 1.2rem;
   font-weight: 600;
-  font-size: 0.9rem;
   cursor: pointer;
+  font-size: 0.9rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -148,170 +124,186 @@ button {
 }
 
 button.primary {
-  background: #00c46a;
-  color: #022013;
+  background: #0ea5e9;
+  color: #f9fafb;
+}
+
+button.primary:hover {
+  background: #0284c7;
 }
 
 button.secondary {
-  background: #0067ff;
-  color: #ffffff;
+  background: #111827;
+  color: #f9fafb;
+}
+
+button.secondary:hover {
+  background: #020617;
 }
 
 button.danger {
-  background: #ff4b4b;
-  color: #ffffff;
+  background: #ef4444;
+  color: #fef2f2;
+}
+
+button.danger:hover {
+  background: #b91c1c;
 }
 
 button:disabled {
-  opacity: 0.65;
+  opacity: 0.6;
   cursor: default;
 }
 
-/* ====== Loading indicator (spinner-text) ====== */
-
-.loading-indicator {
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-  opacity: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: opacity 0.2s ease, max-height 0.2s ease;
-  color: #06354c;
-}
-
-.loading-indicator.visible {
-  opacity: 1;
-  max-height: 2.5rem;
-}
-
-/* ====== Story output (kapitelbok med dropdowns) ====== */
+/* ===== Story output ===== */
 
 .story-output {
-  margin-top: 0.25rem;
-  background: #07141f;
-  border-radius: 12px;
-  padding: 0.9rem 0.9rem 0.6rem;
-  color: #f7f9ff;
-  font-size: 0.9rem;
-  max-height: 60vh;
-  overflow-y: auto;
+  margin-top: 1rem;
+  font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: 0.95rem;
 }
 
-.story-placeholder {
-  opacity: 0.85;
+/* Kapitel = dropdowns */
+.chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
-/* Varje kapitel som ett <details> block */
-.chapter-block {
+.chapter-card {
   border-radius: 10px;
-  margin-bottom: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(7, 26, 42, 0.96);
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  overflow: hidden;
 }
 
-.chapter-block summary {
+.chapter-card summary {
+  padding: 0.55rem 0.9rem;
   list-style: none;
   cursor: pointer;
-  padding: 0.45rem 0.65rem;
   font-weight: 600;
-  font-size: 0.9rem;
+  background: #f3f4f6;
+  user-select: none;
+}
+
+.chapter-card[open] summary {
+  background: #e0f2fe;
+}
+
+.chapter-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.chapter-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.chapter-block summary::-webkit-details-marker {
-  display: none;
+.chapter-label {
+  font-size: 0.9rem;
 }
 
-.chapter-block summary::after {
-  content: "▾";
+.chapter-model {
   font-size: 0.75rem;
-  opacity: 0.9;
-}
-
-.chapter-block[open] summary::after {
-  content: "▴";
+  color: #4b5563;
 }
 
 .chapter-body {
-  padding: 0.4rem 0.65rem 0.6rem;
-  line-height: 1.4;
-  white-space: normal;
+  padding: 0.75rem 0.9rem 0.9rem;
+  line-height: 1.55;
+  font-size: 0.93rem;
+  white-space: pre-wrap;
 }
 
-.chapter-body p {
-  margin: 0 0 0.6rem;
-}
-
-/* Gör senaste kapitlet lite tydligare */
-.chapter-block.latest summary {
-  background: linear-gradient(90deg, #00b8ff 0, #00e28e 100%);
-  color: #04121b;
-}
-
-/* ====== Story actions under kapitelbok ====== */
+/* ===== Story actions ===== */
 
 .story-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 
-/* ====== Accordion-kort (How it works / Safety / FAQ) ====== */
+/* ===== Spinner ===== */
 
-.accordion details {
-  border-radius: 10px;
-  background: #f5fbff;
-  border: 1px solid rgba(0, 69, 104, 0.18);
-}
-
-.accordion summary {
-  list-style: none;
-  padding: 0.6rem 0.8rem;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  display: flex;
+.spinner {
+  font-size: 0.8rem;
+  color: #0f172a;
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.4rem;
 }
 
-.accordion summary::-webkit-details-marker {
+.spinner::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid #0ea5e9;
+  border-top-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner-hidden {
   display: none;
 }
 
-.accordion summary::after {
-  content: "▾";
-  font-size: 0.75rem;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.accordion details[open] summary::after {
-  content: "▴";
+/* ===== Info cards (Hur det funkar / Safety / FAQ) ===== */
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
 }
 
-.accordion-body {
-  padding: 0.4rem 0.8rem 0.7rem;
+.info-card {
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.95);
+  color: #e5e7eb;
+  padding: 0.45rem 0.9rem 0.75rem;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.6);
+}
+
+.info-card summary {
+  list-style: none;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.45rem 0;
+}
+
+.info-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.info-card p {
+  margin: 0.2rem 0;
   font-size: 0.9rem;
 }
 
-/* ====== Toast ====== */
+/* ===== Toast ===== */
 
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 1.2rem;
+  bottom: 1.25rem;
   transform: translateX(-50%);
-  background: rgba(0, 23, 37, 0.95);
-  color: #ffffff;
-  padding: 0.65rem 1rem;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.6rem 1.2rem;
   border-radius: 999px;
   font-size: 0.85rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  z-index: 999;
 }
 
 .toast.visible {
@@ -319,22 +311,26 @@ button:disabled {
   transform: translateX(-50%) translateY(-4px);
 }
 
-/* ====== Responsivt ====== */
+/* ===== Responsivitet ===== */
 
 @media (max-width: 640px) {
-  .hero-inner {
-    text-align: left;
-  }
-
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
   .card {
-    padding: 1.2rem 1rem;
+    padding: 1.2rem 1.1rem;
   }
 
-  .story-output {
-    max-height: 55vh;
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .story-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
