@@ -1,5 +1,5 @@
 // worker/bnkidsstories_worker.js
-// BN-Kids-Stories StoryEngine v2.3 – Dual Model + Safe Rewrite Layer + åldersbaserad längd
+// BN-Kids-Stories StoryEngine v2.3 – Dual Model + Safe Rewrite + Escalation Control
 
 // ======================================================
 // MODELLER (AUTO-VÄLJ UTIFRÅN PROMPTEN)
@@ -59,10 +59,10 @@ const BN_SAFE_REWRITE_ENGINE_V1 = {
 };
 
 // ======================================================
-// SYSTEMPROMPT – kärnan (justerad för att undvika floskelspam)
+// SYSTEMPROMPT – kärnan (justerad för floskel & eskalation & konsistens)
 // ======================================================
 const BN_KIDS_STORIES_SYSTEM_PROMPT = `
-Du är BN-Kids-Stories StoryEngine v2.
+Du är BN-Kids-Stories StoryEngine v2.3.
 
 Ditt jobb är att skriva kapitel i kapitelböcker för barn och unga ca 8–15 år
 baserat på en JSON-request som du alltid får i USER-meddelandet.
@@ -82,16 +82,32 @@ Viktigt om stil:
 - Slutet på ett kapitel ska kännas naturligt:
   ibland lite öppet, ibland lugnt avslut – men inte alltid exakt samma typ av cliffhanger.
 
-Våld & farliga ord:
-- Du får använda fantasi: robotar, cyborgar, monster, vargar, laserögon etc.
-- Om något kan tolkas som brutalt våld ska du själv omforma det till en trygg, lekfull variant
-  (energi-strålar, magiska krafter, mekaniska utmaningar istället för skada).
-- Inget blod, inga sönderslagna kroppar, ingen tortyr.
+NO FORCED ESCALATION – hur magi och äventyr får växa:
+- JSON:en innehåller chapter_number = vilket kapitel som ska skrivas nu (1, 2, 3, ...).
+- Om barnet INTE nämner magiska saker i sin prompt:
+  * Kapitel 1: håll berättelsen helt vardaglig. Ingen magisk sten, ingen portal,
+    inga talande djur eller uppdrag. Låt lek, relationer, miljö och känslor bära kapitlet.
+  * Kapitel 2: du får bara antyda mystik på ett milt sätt
+    (t.ex. konstigt ljud, något som glittrar, en känsla av att något är speciellt)
+    men introducera inte fullfjädrad magi, uppdrag eller stora hemligheter ännu.
+  * Kapitel 3 och framåt: nu får magi och äventyr ta fart – OM barnets prompt pekar åt det hållet
+    eller tidigare antydningar motiverar det.
+- Om barnet uttryckligen ber om magi, portal, uppdrag eller liknande redan i första eller andra kapitlet,
+  får du naturligtvis svara på det – men bygg ändå upp det stegvis så att det känns logiskt.
+
+Konsistens – lämna inte trådar:
+- Använd previous_chapters och summary_so_far för att hålla röd tråd.
+- Om du tidigare introducerat viktiga element (t.ex. magisk sten, osynlig vän,
+  talande fårskalle, speciell önskelista osv) får du ALDRIG bara glömma bort dem.
+- I varje nytt kapitel ska du:
+  1) Antingen låta minst ett sådant element synas igen,
+  2) Eller kort förklara varför det inte är med just nu,
+  3) Eller knyta ihop tråden (t.ex. lösa gåtan, säga att uppdraget är klart).
+- Upprepa inte långa meningar eller stycken ordagrant från tidigare kapitel.
 
 Story-struktur:
-- Använd previous_chapters och summary_so_far för att hålla röd tråd.
-- Upprepa inte långa meningar eller stycken ordagrant.
 - Varje kapitel ska ha början, mitt och slut – även om boken fortsätter sen.
+- Håll språket tydligt, bilderna levande och tempot anpassat efter barnets ålder.
 `;
 
 // ======================================================
@@ -198,7 +214,7 @@ export default {
         JSON.stringify({
           ok: true,
           worker: "bn-kids-stories StoryEngine v2.3",
-          note: "dual model + safe rewrite + age-based length active"
+          note: "dual model + safe rewrite + escalation control"
         })
       );
     }
@@ -270,6 +286,10 @@ export default {
           ageNum
         );
 
+        // Nästa kapitelnummer (1-baserat) – används i modellen för eskalationsreglerna
+        const nextIndex =
+          typeof chapter_index === "number" ? chapter_index + 1 : 1;
+
         // Bygg payload för modellen – vi skickar den säkra versionen
         const storyPayloadForModel = {
           mode,
@@ -277,6 +297,7 @@ export default {
           child_age: ageNum,
           book_title,
           chapter_index,
+          chapter_number: nextIndex, // nyckel modellen kan använda direkt
           previous_chapters,
           summary_so_far,
           child_prompt: safePrompt
@@ -285,27 +306,22 @@ export default {
         // ---------- MODELLVAL ----------
         const chosenModel = pickModel(child_prompt || safePrompt || "");
 
-        // ---------- NYTT: FULLT ÅLDERSBASERAT LÄNGDSYSTEM v1 ----------
-        // Du kan ändra siffrorna här UTAN att något annat påverkas.
-        // Alla värden är "max_tokens" → ungefär tokens ≈ 0.75 * antal ord.
-
-        let maxTokens = 900; // fallback om ålder saknas eller är konstig
-
-        if (ageNum >= 3 && ageNum <= 6) {
-          // 3–6 år: kortare, mycket mjuka kapitel
-          maxTokens = 600; // ~450–550 ord
-        } else if (ageNum >= 7 && ageNum <= 9) {
-          // 7–9 år: mer fart men barnvänligt
-          maxTokens = 1100; // ~800–900 ord
-        } else if (ageNum >= 10 && ageNum <= 12) {
-          // 10–12 år: längre story, mer komplexitet
-          maxTokens = 1400; // ~1000–1150 ord
-        } else if (ageNum >= 13 && ageNum <= 15) {
-          // 13–15 år: längst, mest detaljer
-          maxTokens = 1700; // ~1300–1500 ord
+        // ---------- ÅLDERSBASERAD LÄNGD ----------
+        // Björn: justera dessa gränser om du vill ha längre/kortare kapitel.
+        // Siffrorna är "max_tokens" till OpenAI (inte exakt antal ord).
+        let maxTokens;
+        if (ageNum <= 6) {
+          // ca 450–650 ord
+          maxTokens = 700;
+        } else if (ageNum <= 9) {
+          // ca 600–800 ord
+          maxTokens = 900;
+        } else if (ageNum <= 12) {
+          // ca 700–900+ ord
+          maxTokens = 1100;
         } else {
-          // Ålder över 15 eller helt off
-          maxTokens = 1200;
+          // ca 800–1000+ ord för äldre barn
+          maxTokens = 1300;
         }
 
         // ---------- CALL OPENAI VIA FETCH ----------
@@ -356,9 +372,6 @@ export default {
             500
           );
         }
-
-        const nextIndex =
-          typeof chapter_index === "number" ? chapter_index + 1 : 1;
 
         // ---------- SVAR TILL FRONTEND ----------
         return corsResponse(
